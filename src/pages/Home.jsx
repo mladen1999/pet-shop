@@ -1,65 +1,97 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
-const pets = [
-  { id: 1, name: "Maza", type: "Pas", age: 2, size: "Mali", price: 200, rating: 4.5 },
-  { id: 2, name: "Cicko", type: "Mačka", age: 3, size: "Srednji", price: 150, rating: 4.7 },
-  { id: 3, name: "Puffy", type: "Zec", age: 1, size: "Mali", price: 100, rating: 4.8 },
-  { id: 4, name: "Goldie", type: "Ribica", age: 1, size: "Mali", price: 50, rating: 4.3 },
-  { id: 5, name: "Rex", type: "Pas", age: 5, size: "Veliki", price: 300, rating: 4.6 },
-];
+import { motion } from "framer-motion"; // Import animacija
 
 function Home() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterSize, setFilterSize] = useState("");
+  const [filterOrigin, setFilterOrigin] = useState("");
+  const [filterPrice, setFilterPrice] = useState("");
+  const pets = JSON.parse(localStorage.getItem("pets")) || [];
 
   const filteredPets = pets.filter(
     (pet) =>
       pet.name.toLowerCase().includes(search.toLowerCase()) &&
-      (filterType === "" || pet.type === filterType)
+      (filterType === "" || pet.type === filterType) &&
+      (filterSize === "" || pet.size === filterSize) &&
+      (filterOrigin === "" || pet.origin === filterOrigin) &&
+      (filterPrice === "" || pet.price <= parseInt(filterPrice))
   );
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Pregled ljubimaca</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">🐾 Pregled ljubimaca 🐾</h1>
 
-      {/* Input za pretragu */}
+      {/* Polje za pretragu */}
       <input
         type="text"
-        placeholder="Pretraži ljubimce..."
-        className="w-full p-2 mb-4 border rounded"
+        placeholder="🔍 Pretraži ljubimce..."
+        className="w-full p-2 mb-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <select
-        className="w-full p-2 mb-4 border rounded"
-        value={filterType}
-        onChange={(e) => setFilterType(e.target.value)}
-      >
-        <option value="">Sve vrste</option>
-        <option value="Pas">Pas</option>
-        <option value="Mačka">Mačka</option>
-        <option value="Zec">Zec</option>
-        <option value="Ribica">Ribica</option>
-      </select>
+      {/* Filteri */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <select className="w-full p-2 border rounded" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+          <option value="">Sve vrste</option>
+          <option value="Pas">Pas</option>
+          <option value="Mačka">Mačka</option>
+          <option value="Zec">Zec</option>
+          <option value="Papagaj">Papagaj</option>
+          <option value="Ribica">Ribica</option>
+        </select>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <select className="w-full p-2 border rounded" value={filterSize} onChange={(e) => setFilterSize(e.target.value)}>
+          <option value="">Sve veličine</option>
+          <option value="Mali">Mali</option>
+          <option value="Srednji">Srednji</option>
+          <option value="Veliki">Veliki</option>
+        </select>
+
+        <select className="w-full p-2 border rounded" value={filterOrigin} onChange={(e) => setFilterOrigin(e.target.value)}>
+          <option value="">Sva porekla</option>
+          <option value="Srbija">Srbija</option>
+          <option value="Hrvatska">Hrvatska</option>
+          <option value="Japan">Japan</option>
+          <option value="Francuska">Francuska</option>
+          <option value="Italija">Italija</option>
+        </select>
+
+        <input
+          type="number"
+          placeholder="Maksimalna cena (€)"
+          className="w-full p-2 border rounded"
+          value={filterPrice}
+          onChange={(e) => setFilterPrice(e.target.value)}
+        />
+      </div>
+
+      {/* Lista ljubimaca */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {filteredPets.length > 0 ? (
           filteredPets.map((pet) => (
-            <div key={pet.id} className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-lg font-semibold">{pet.name}</h2>
+            <motion.div
+              key={pet.id}
+              className="bg-white p-6 rounded-lg shadow-lg transform transition hover:scale-105"
+              whileHover={{ scale: 1.05 }}
+            >
+              <img src={pet.image} alt={pet.name} className="w-full h-48 object-cover rounded-lg mb-4" />
+              <h2 className="text-xl font-semibold">{pet.name}</h2>
               <p className="text-gray-600">Vrsta: {pet.type}</p>
               <p className="text-gray-600">Starost: {pet.age} godine</p>
+              <p className="text-gray-600">Veličina: {pet.size}</p>
               <p className="text-gray-600">Cena: {pet.price}€</p>
               <p className="text-gray-600">Ocena: ⭐ {pet.rating}</p>
-              <Link to={`/pet/${pet.id}`} className="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded">
+              <p className="text-gray-600">Poreklo: {pet.origin}</p>
+              <Link to={`/pet/${pet.id}`} className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">
                 Detalji
               </Link>
-            </div>
+            </motion.div>
           ))
         ) : (
-          <p className="text-gray-600">Nema rezultata za pretragu.</p>
+          <p className="text-gray-600 text-center">❌ Nema rezultata za pretragu.</p>
         )}
       </div>
     </div>
